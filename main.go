@@ -49,7 +49,8 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Printf("S[%d]:%s", n, buf[:n])
+			fmt.Printf("\rS[%d]:%s", n, buf[:n])
+			fmt.Printf("imap>")
 		}
 	}()
 
