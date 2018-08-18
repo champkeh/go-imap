@@ -7,6 +7,10 @@ An interactive command-line tool for learn [IMAP4rev1](https://tools.ietf.org/ht
 
 因此，本项目的目的就是提供一个可交互的命令行工具，可直接使用[IMAP4rev1](https://tools.ietf.org/html/rfc3501)规定的命令与服务器通信，并且可以非常详细的查看通信细节。(因此，此项目实际上只是一个imap client)
 
+> 后来我才知道，原来可以直接使用`telnet`程序进行交互([用telnet验证imap](http://blog.51cto.com/linuxroad/1000530))，但`telnet`只能连接到未使用ssl加密的服务，也就是143端口。而想要连接993端口，就无法通过`telnet`程序实现了。而本程序一开始就是测试的993端口。
+>
+> 也就是说，本程序其实只不过是一个`telnet`程序而已。但我发现，用`telnet`程序的返回报文中，对于中文没有进行解码，也就是无法显示中文。所以本项目也是有意义的:)
+
 ## Install
 ```cmd
 go get github.com/champkeh/go-imap
