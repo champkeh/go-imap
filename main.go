@@ -9,7 +9,10 @@ import (
 	"os"
 	"strings"
 
+	"bytes"
+
 	"github.com/champkeh/go-imap/internal/tag"
+	"github.com/fatih/color"
 )
 
 var (
@@ -21,10 +24,16 @@ var (
 	// tag generator
 	// generate tag from A0001, A0002, A0003,...
 	tagGenerator func() string
+
+	sColor *color.Color
+	cColor *color.Color
 )
 
 func init() {
 	tagGenerator = tag.NewTagGenerator()
+
+	cColor = color.New(color.FgMagenta)
+	sColor = color.New(color.FgBlue)
 }
 
 func main() {
@@ -46,14 +55,23 @@ func main() {
 
 	// 开启read-goroutine
 	go func() {
-		for {
-			buf := make([]byte, 512)
-			n, err := conn.Read(buf)
-			if err != nil {
-				log.Fatal(err)
+		scanner := bufio.NewScanner(conn)
+		scanner.Split(ScanCRLF)
+		isGreeting := true
+		for scanner.Scan() {
+			resp := scanner.Text()
+			sColor.Printf("S[%d]:", len(resp))
+			fmt.Printf("%s\n", resp)
+			if resp[0] != '*' {
+				fmt.Printf("imap>")
 			}
-			fmt.Printf("\rS[%d]:%s", n, buf[:n])
-			fmt.Printf("imap>")
+			if isGreeting {
+				fmt.Printf("imap>")
+				isGreeting = false
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
@@ -66,6 +84,30 @@ func main() {
 }
 
 func send(conn *tls.Conn, cmd string) {
-	fmt.Printf("C[%d]:%s", len(cmd), cmd)
+	cColor.Printf("C[%d]:", len(cmd))
+	fmt.Printf("%s", cmd)
 	conn.Write([]byte(cmd))
+}
+
+func dropCR(data []byte) []byte {
+	if len(data) > 0 && data[len(data)-1] == '\r' {
+		return data[0 : len(data)-1]
+	}
+	return data
+}
+
+func ScanCRLF(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.Index(data, []byte{'\r', '\n'}); i >= 0 {
+		// We have a full newline-terminated line.
+		return i + 2, dropCR(data[0:i]), nil
+	}
+	// If we're at EOF, we have a final, non-terminated line. Return it.
+	if atEOF {
+		return len(data), dropCR(data), nil
+	}
+	// Request more data.
+	return 0, nil, nil
 }
