@@ -8,11 +8,14 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/champkeh/go-imap/internal/tag"
 )
 
 var (
 	// imap server address
-	// qq mail server: imap.qq.com:993
+	// qq mail server: imap.qq.com:993(ssl)
+	//				   imap.qq.com:143(no ssl)
 	addr string
 
 	// tag generator
@@ -21,7 +24,7 @@ var (
 )
 
 func init() {
-	tagGenerator = generateTag()
+	tagGenerator = tag.NewTagGenerator()
 }
 
 func main() {
@@ -65,12 +68,4 @@ func main() {
 func send(conn *tls.Conn, cmd string) {
 	fmt.Printf("C[%d]:%s", len(cmd), cmd)
 	conn.Write([]byte(cmd))
-}
-
-func generateTag() func() string {
-	c := 0
-	return func() string {
-		c++
-		return fmt.Sprintf("A%04d", c)
-	}
 }
