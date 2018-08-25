@@ -69,3 +69,9 @@ S[50]:* BYE LOGOUT received
 A0003 OK LOGOUT Completed
 imap>2018/08/21 00:04:12 EOF
 ```
+
+
+## Todo
+- [ ] 添加命令历史记录，以便可以通过上下箭头键进行快速输入
+- [ ] 自动检测 imap-server-address 是否是ssl
+- [ ] 实现读取邮件内容的命令
